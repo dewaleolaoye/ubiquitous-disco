@@ -101,30 +101,7 @@
         }
       }
 
-      // function app(state = {}, action) {
-      //   return {
-      //     todos: todos(state.todos, action),
-      //     goals: goals(state.goals, action),
-      //   };
-      // }
-
-      const store = Redux.createStore(
-        Redux.combineReducers({
-          todos,
-          goals,
-        })
-      );
-
-      store.subscribe(() => {
-        const { todos, goals } = store.getState();
-        document.getElementById('todos').innerHTML = '';
-        document.getElementById('goals').innerHTML = '';
-        console.log(store.getState(), 'store');
-        todos.forEach(addTodoToDom);
-        goals.forEach(addGoalToDom);
-      });
-
-      function checkAndDispatch(store, action) {
+      const Checker = (store) => (next) => (action) => {
         if (
           action.type === ADD_TODO &&
           action.todo.name.toLowerCase().includes('bitcoin')
@@ -138,8 +115,25 @@
           return alert("No, that's a bad idea");
         }
 
-        store.dispatch(action);
-      }
+        return next(action);
+      };
+
+      const store = Redux.createStore(
+        Redux.combineReducers({
+          todos,
+          goals,
+        }),
+        Redux.applyMiddleware(Checker)
+      );
+
+      store.subscribe(() => {
+        const { todos, goals } = store.getState();
+        document.getElementById('todos').innerHTML = '';
+        document.getElementById('goals').innerHTML = '';
+        console.log(store.getState(), 'store');
+        todos.forEach(addTodoToDom);
+        goals.forEach(addGoalToDom);
+      });
 
       // Add Todo
       function addTodo() {
@@ -148,8 +142,7 @@
 
         input.value = '';
 
-        checkAndDispatch(
-          store,
+        store.dispatch(
           addTodoAction({
             name,
             completed: false,
@@ -164,8 +157,7 @@
 
         input.value = '';
 
-        checkAndDispatch(
-          store,
+        store.dispatch(
           addGoalAction({
             name,
             id: generateId(),
@@ -189,7 +181,7 @@
         const text = document.createTextNode(todo.name);
 
         const removeButton = createRemoveButton(() => {
-          checkAndDispatch(store, removeTodoAction(todo.id));
+          store.dispact(removeTodoAction(todo.id));
         });
 
         node.appendChild(text);
@@ -198,7 +190,7 @@
         node.style.textDecoration = todo.completed ? 'line-through' : 'none';
 
         node.addEventListener('click', () => {
-          checkAndDispatch(store, toggleTodoAction(todo.id));
+          store.dispact(toggleTodoAction(todo.id));
         });
 
         document.getElementById('todos').appendChild(node);
@@ -209,7 +201,7 @@
         const text = document.createTextNode(goals.name);
 
         const removeButton = createRemoveButton(() => {
-          checkAndDispatch(store, removeGoalAction(goals.id));
+          store.dispact(removeGoalAction(goals.id));
         });
 
         node.appendChild(text);
