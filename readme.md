@@ -1,4 +1,4 @@
 ## Redux with HTML
 
 - To Run:
-  -- You can simply open `index.html` or `fixBug.html`, and open in default browser.
+  - You can simply open `index.html` or `fixBug.html`, and open in default browser.
